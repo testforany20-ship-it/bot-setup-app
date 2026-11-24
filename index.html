@@ -15,33 +15,47 @@
   .card p { font-size: 14px; color: #b6c0ca; margin-bottom: 10px; line-height: 1.5; }
   .status { float: right; font-size: 18px; }
   input[type=text], input[type=password] { width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3; font-size: 15px; margin-bottom: 10px; }
-  button { background: #21262d; color: #e6edf3; border: 1px solid #30363d; padding: 11px 16px; border-radius: 8px; font-size: 15px; cursor: pointer; width: 100%; font-family: inherit; }
-  button:active { opacity: .8; }
+  button, .linkbtn { display: block; text-align: center; text-decoration: none; background: #21262d; color: #e6edf3; border: 1px solid #30363d; padding: 11px 16px; border-radius: 8px; font-size: 15px; cursor: pointer; width: 100%; font-family: inherit; margin-bottom: 8px; }
+  button:active, .linkbtn:active { opacity: .8; }
   button.primary { background: #238636; border-color: #238636; color: #fff; font-weight: bold; }
   button:disabled { opacity: .45; cursor: not-allowed; }
   button.google { background: #fff; color: #222; font-weight: bold; }
-  .msg { font-size: 14px; margin-top: 8px; min-height: 18px; line-height: 1.5; }
+  .linkbtn { background: #1c2a3a; border-color: #1f6feb; color: #58a6ff; }
+  .msg { font-size: 14px; margin-top: 4px; min-height: 18px; line-height: 1.5; }
   .ok { color: #3fb950; } .err { color: #f85149; } .warn { color: #d29922; }
+  details { margin-bottom: 10px; }
+  details summary { cursor: pointer; color: #58a6ff; font-size: 14px; }
+  details ol { margin: 8px 0 4px 20px; font-size: 14px; color: #b6c0ca; line-height: 1.7; }
   .blog-item { display: block; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; font-size: 15px; }
   .blog-item.sel { border-color: #238636; background: #12241a; }
   .blog-item small { color: #8b949e; display: block; word-break: break-all; }
   #launchBtn { font-size: 18px; padding: 15px; }
   #progress { display: none; }
   #progress div { font-size: 15px; padding: 4px 0; }
-  .hidden { display: none; }
   a { color: #58a6ff; }
   .note { font-size: 13px; color: #8b949e; text-align: center; margin-top: 14px; line-height: 1.6; }
 </style>
 </head>
 <body>
 <h1>🤖 ব্লগ বট সেটআপ</h1>
-<p class="sub">ধাপে ধাপে সব বসাও — শেষে এক বোতামেই বট চালু</p>
+<p class="sub">একটা একটা করে পূরণ করো — সব হলে বট নিজে নিজেই চালু হয়ে যাবে</p>
 
 <div class="card" id="card1">
   <span class="status" id="st1">⬜</span>
   <h2>ধাপ ১: GitHub Token</h2>
-  <p>তোমার GitHub fine-grained token-টা বসাও। এটা শুধু তোমার এই ফোনেই থাকবে — কোথাও পাঠানো হবে না।</p>
-  <input type="password" id="pat" placeholder="github_pat_...">
+  <p>এটা লাগবে বটের সেটিং বসানোর জন্য। শুধু তোমার এই ফোনেই থাকবে — কোথাও পাঠানো হবে না। বসালেই নিজে নিজে যাচাই হয়ে যাবে।</p>
+  <a class="linkbtn" href="https://github.com/settings/personal-access-tokens/new" target="_blank">🔗 টোকেন নেই? এখানে গিয়ে বানাও</a>
+  <details>
+    <summary>টোকেন বানানোর সময় কী কী টিক দেবে?</summary>
+    <ol>
+      <li>Token name: যেকোনো নাম দাও (যেমন Bot Setup)</li>
+      <li>Expiration: 1 year বা No expiration</li>
+      <li>Repository access → <b>Only select repositories</b> → <b>blog-bot</b> বেছে নাও</li>
+      <li>Permissions → Repository permissions-এ টিক দাও: <b>Actions: Read and write</b>, <b>Secrets: Read and write</b>, <b>Workflows: Read and write</b></li>
+      <li>নিচে <b>Generate token</b> চাপো → token-টা কপি করে এখানে বসাও</li>
+    </ol>
+  </details>
+  <input type="password" id="pat" placeholder="এখানে GitHub token-টা বসাও (github_pat_...)">
   <button onclick="checkPat()">যাচাই করো</button>
   <div class="msg" id="msg1"></div>
 </div>
@@ -49,8 +63,9 @@
 <div class="card" id="card2">
   <span class="status" id="st2">⬜</span>
   <h2>ধাপ ২: Gemini API Key</h2>
-  <p>বট এই key দিয়ে খবর rewrite করে। <a href="https://aistudio.google.com/apikey" target="_blank">এখান থেকে key পাবে</a></p>
-  <input type="password" id="gemini" placeholder="AIza...">
+  <p>বট এই key দিয়ে খবর rewrite করে। বসালেই নিজে নিজে যাচাই হয়ে যাবে।</p>
+  <a class="linkbtn" href="https://aistudio.google.com/apikey" target="_blank">🔗 Key নেই? এখানে গিয়ে বানাও (Create API key)</a>
+  <input type="password" id="gemini" placeholder="এখানে Gemini key-টা বসাও (AIza...)">
   <button onclick="checkGemini()">যাচাই করো</button>
   <div class="msg" id="msg2"></div>
 </div>
@@ -59,16 +74,17 @@
   <span class="status" id="st3">⬜</span>
   <h2>ধাপ ৩: Pixabay API Key <small style="color:#8b949e">(না দিলেও চলবে)</small></h2>
   <p>ছবি খোঁজার backup হিসেবে লাগে। না থাকলে এই ধাপ এড়িয়ে যাও।</p>
-  <input type="password" id="pixabay" placeholder="Pixabay key">
+  <a class="linkbtn" href="https://pixabay.com/api/docs/" target="_blank">🔗 Key কোথায় পাবে? এই পেজে লগইন করলেই key লেখা দেখবে</a>
+  <input type="password" id="pixabay" placeholder="এখানে Pixabay key-টা বসাও">
   <button onclick="checkPixabay()">যাচাই করো</button>
-  <button onclick="skipPixabay()" style="margin-top:8px">এড়িয়ে যাও</button>
+  <button onclick="skipPixabay()">এড়িয়ে যাও</button>
   <div class="msg" id="msg3"></div>
 </div>
 
 <div class="card" id="card4">
   <span class="status" id="st4">⬜</span>
   <h2>ধাপ ৪: কোন ব্লগে পোস্ট হবে?</h2>
-  <p>Google দিয়ে লগইন করে তোমার ব্লগের তালিকা থেকে বেছে নাও। যেই Google account-এ ব্লগটা আছে, সেটা দিয়েই লগইন করবে।</p>
+  <p>নিচের বোতামে Google দিয়ে লগইন করলে তোমার ব্লগের তালিকা আসবে — সেখান থেকে একটা বেছে নিলেই হবে। যেই Google account-এ ব্লগটা আছে, সেটা দিয়েই লগইন করবে।</p>
   <button class="google" onclick="pickBlog()">Google দিয়ে লগইন করে ব্লগ বাছো</button>
   <div id="blogList" style="margin-top:10px"></div>
   <div class="msg" id="msg4"></div>
@@ -77,14 +93,14 @@
 <div class="card" id="card5">
   <span class="status" id="st5">⬜</span>
   <h2>ধাপ ৫: Blogger-এ পোস্টের অনুমতি</h2>
-  <p>শেষ ধাপ। নিচের বোতামে চাপ দিলে Google-এর পেজ খুলবে — ধাপ ৪-এ যে account দিয়ে লগইন করেছিলে সেটাই বেছে নিয়ে <b>Allow / অনুমতি দাও</b> চাপবে। তাহলেই এখানে ফিরে আসবে।</p>
+  <p>শেষ ধাপ। নিচের বোতামে চাপ দিলে Google-এর পেজ খুলবে — ধাপ ৪-এ যে account দিয়ে লগইন করেছিলে সেটাই বেছে নিয়ে <b>Allow / অনুমতি দাও</b> চাপবে। তাহলেই এখানে ফিরে আসবে, আর বট নিজে নিজেই চালু হয়ে যাবে।</p>
   <button class="google" id="googleBtn" onclick="googleLogin()">Google-এ অনুমতি দাও</button>
   <div class="msg" id="msg5"></div>
 </div>
 
 <div class="card" id="cardLaunch">
-  <h2>🚀 সব তৈরি?</h2>
-  <p>সব ধাপ ✅ হলে এই বোতামটা চালু হবে। চাপ দিলেই বটে সব সেটিং বসে যাবে আর পোস্ট চালু হয়ে যাবে।</p>
+  <h2>🚀 বট চালু করা</h2>
+  <p>সব ধাপ ✅ হলেই বট নিজে নিজে চালু হয়ে যাবে — আলাদা করে কিছু চাপতে হবে না। কোনো কারণে না হলে নিচের বোতামটা চাপলেই আবার চেষ্টা হবে।</p>
   <button class="primary" id="launchBtn" disabled onclick="launch()">বট চালু করো</button>
   <div id="progress"></div>
   <div class="msg" id="msgLaunch"></div>
@@ -104,6 +120,7 @@ const $ = id => document.getElementById(id);
 const state = { pat:false, gemini:false, pixabay:false, blog:false, google:false };
 let chosenBlog = JSON.parse(localStorage.getItem("bs_blog") || "null");
 let authCode = sessionStorage.getItem("bs_code") || null;
+let launching = false, autoLaunched = false;
 
 function saveLocal() {
   localStorage.setItem("bs_pat", $("pat").value.trim());
@@ -117,8 +134,14 @@ function mark(n, ok) {
   $("card" + {pat:1,gemini:2,pixabay:3,blog:4,google:5}[n]).classList.toggle("done", ok);
   refreshLaunch();
 }
+function allReady() { return state.pat && state.gemini && state.blog && state.google && authCode; }
 function refreshLaunch() {
-  $("launchBtn").disabled = !(state.pat && state.gemini && state.blog && state.google);
+  $("launchBtn").disabled = !allReady();
+  if (allReady() && !autoLaunched && !launching) {
+    autoLaunched = true;
+    $("msgLaunch").innerHTML = '<span class="ok">🎉 সব ধাপ পূরণ হয়েছে — বট নিজে নিজেই চালু হচ্ছে…</span>';
+    setTimeout(() => launch(), 1500);
+  }
 }
 function ghHeaders() {
   return { "Authorization": "Bearer " + $("pat").value.trim(),
@@ -136,13 +159,15 @@ async function checkPat() {
     let u = await r.json();
     r = await fetch(`https://api.github.com/repos/${REPO}/actions/secrets/public-key`, { headers: ghHeaders() });
     if (r.status === 403 || r.status === 404) {
-      m.innerHTML = '<span class="err">Token ঠিক আছে (' + u.login + '), কিন্তু এতে <b>Secrets</b> permission নেই।</span><br>GitHub → Settings → Developer settings → Fine-grained tokens → তোমার token → Repository permissions → <b>Secrets: Read and write</b> দিয়ে Save করো, তারপর আবার যাচাই করো।';
+      mark("pat", false);
+      m.innerHTML = '<span class="err">Token ঠিক আছে (' + u.login + '), কিন্তু এতে <b>Secrets</b> permission নেই।</span><br>উপরের নীল লিংক থেকে নতুন token বানাও — টিকের তালিকাটা খুলে দেখে নাও।';
       return;
     }
     if (!r.ok) throw new Error("repo");
     saveLocal(); mark("pat", true);
     m.innerHTML = '<span class="ok">✅ ঠিক আছে — account: ' + u.login + '</span>';
   } catch(e) {
+    mark("pat", false);
     m.innerHTML = '<span class="err">❌ Token কাজ করছে না। ঠিক করে বসিয়েছো তো?</span>';
   }
 }
@@ -157,6 +182,7 @@ async function checkGemini() {
     saveLocal(); mark("gemini", true);
     m.innerHTML = '<span class="ok">✅ Gemini key ঠিক আছে</span>';
   } catch(e) {
+    mark("gemini", false);
     m.innerHTML = '<span class="err">❌ Key কাজ করছে না। আবার দেখে বসাও।</span>';
   }
 }
@@ -171,6 +197,7 @@ async function checkPixabay() {
     saveLocal(); mark("pixabay", true);
     m.innerHTML = '<span class="ok">✅ Pixabay key ঠিক আছে</span>';
   } catch(e) {
+    mark("pixabay", false);
     m.innerHTML = '<span class="err">❌ Key কাজ করছে না</span>';
   }
 }
@@ -178,6 +205,20 @@ function skipPixabay() {
   $("pixabay").value = ""; saveLocal(); mark("pixabay", true);
   $("msg3").innerHTML = '<span class="warn">⏭️ এড়িয়ে গেলে — শুধু Wikimedia ছবি দিয়েই বট চলবে</span>';
 }
+
+// Auto-verify when a value is pasted/typed (no need to press the button)
+function autoVerify(inputId, fn, minLen) {
+  let t = null, last = "";
+  $(inputId).addEventListener("input", () => {
+    clearTimeout(t);
+    const v = $(inputId).value.trim();
+    if (v.length < minLen || v === last) return;
+    t = setTimeout(() => { last = $(inputId).value.trim(); fn(); }, 900);
+  });
+}
+autoVerify("pat", checkPat, 20);
+autoVerify("gemini", checkGemini, 15);
+autoVerify("pixabay", checkPixabay, 10);
 
 function pickBlog() {
   const m = $("msg4");
@@ -224,7 +265,7 @@ function googleLogin() {
   location.href = url;
 }
 
-// Returning from Google consent?
+// Returning from Google consent? Restore saved values and re-verify them automatically.
 (function init() {
   const q = new URLSearchParams(location.search);
   if (q.get("code")) {
@@ -241,13 +282,15 @@ function googleLogin() {
   $("pixabay").value = localStorage.getItem("bs_pixabay") || "";
   if (authCode) {
     mark("google", true);
-    $("msg5").innerHTML = '<span class="ok">✅ Google অনুমতি পাওয়া গেছে! এখন নিচের সবুজ বোতামটা চাপো — দেরি করো না, এই অনুমতির কোড বেশিক্ষণ থাকে না।</span>';
+    $("msg5").innerHTML = '<span class="ok">✅ Google অনুমতি পাওয়া গেছে! বাকি ধাপগুলো যাচাই হলেই বট নিজে নিজে চালু হয়ে যাবে — দেরি করো না, এই কোড বেশিক্ষণ থাকে না।</span>';
   }
   if (chosenBlog) {
     mark("blog", true);
     $("msg4").innerHTML = '<span class="ok">✅ আগের বাছাই: ' + chosenBlog.name + ' (বদলাতে চাইলে আবার লগইন করো)</span>';
   }
-  if (localStorage.getItem("bs_pixabay") === "" && localStorage.getItem("bs_pixabay") !== null) {}
+  if ($("pat").value) checkPat();
+  if ($("gemini").value) checkGemini();
+  if ($("pixabay").value) checkPixabay();
 })();
 
 async function setSecret(name, value) {
@@ -293,6 +336,8 @@ async function waitRun(workflow, label, timeoutMs) {
 }
 
 async function launch() {
+  if (launching) return;
+  launching = true;
   const btn = $("launchBtn"), box = $("progress"), m = $("msgLaunch");
   btn.disabled = true; box.style.display = "block"; box.innerHTML = ""; m.innerHTML = "";
   const step = (t) => { box.innerHTML += "<div>" + t + "</div>"; };
@@ -310,7 +355,6 @@ async function launch() {
     step("✅ Google সংযোগ হয়ে গেছে");
     sessionStorage.removeItem("bs_code"); authCode = null;
     step("⏳ বটের প্রথম রান শুরু হচ্ছে…");
-    // find the main posting workflow (any active workflow that is not the setup one)
     let r = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows?per_page=50`, { headers: ghHeaders() });
     let wfs = (await r.json()).workflows.filter(w => w.state === "active" && !w.path.includes("setup-exchange"));
     if (!wfs.length) throw new Error("workflow not found");
@@ -320,7 +364,8 @@ async function launch() {
     step('রান দেখতে চাইলে: <a href="https://github.com/' + REPO + '/actions" target="_blank">GitHub Actions পেজ</a>');
     $("cardLaunch").classList.add("done");
   } catch(e) {
-    m.innerHTML = '<span class="err">❌ মাঝখানে আটকে গেছে: ' + e.message + '<br>আবার সবুজ বোতামটা চাপো। Google কোডের মেয়াদ শেষ হয়ে গেলে ধাপ ৫ আবার করতে হবে।</span>';
+    m.innerHTML = '<span class="err">❌ মাঝখানে আটকে গেছে: ' + e.message + '<br>নিচের বোতামটা চাপলে আবার চেষ্টা হবে। Google কোডের মেয়াদ শেষ হয়ে গেলে ধাপ ৫ আবার করতে হবে।</span>';
+    launching = false; autoLaunched = false;
     btn.disabled = false;
   }
 }
