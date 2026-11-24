@@ -1,0 +1,27 @@
+name: Setup Exchange
+
+# One-time helper for the Blog Bot Setup app: exchanges the Google
+# authorization code (SETUP_CODE secret) for a Blogger refresh token
+# and stores it as the bot's REFRESH_TOKEN secret. Triggered manually
+# by the setup app via workflow_dispatch.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  exchange:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pynacl
+      - name: Exchange code and store refresh token
+        env:
+          SETUP_CODE: ${{ secrets.SETUP_CODE }}
+          NEW_CLIENT_ID: ${{ secrets.NEW_CLIENT_ID }}
+          NEW_CLIENT_SECRET: ${{ secrets.NEW_CLIENT_SECRET }}
+          SETUP_PAT: ${{ secrets.SETUP_PAT }}
+          REPO: ${{ github.repository }}
+        run: python setup_exchange.py

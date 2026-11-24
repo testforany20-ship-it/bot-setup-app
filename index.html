@@ -15,6 +15,7 @@
   .card p { font-size: 14px; color: #b6c0ca; margin-bottom: 10px; line-height: 1.5; }
   .status { float: right; font-size: 18px; }
   input[type=text], input[type=password] { width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3; font-size: 15px; margin-bottom: 10px; }
+  input[readonly] { color: #58a6ff; }
   button, .linkbtn { display: block; text-align: center; text-decoration: none; background: #21262d; color: #e6edf3; border: 1px solid #30363d; padding: 11px 16px; border-radius: 8px; font-size: 15px; cursor: pointer; width: 100%; font-family: inherit; margin-bottom: 8px; }
   button:active, .linkbtn:active { opacity: .8; }
   button.primary { background: #238636; border-color: #238636; color: #fff; font-weight: bold; }
@@ -38,64 +39,113 @@
 </head>
 <body>
 <h1>🤖 ব্লগ বট সেটআপ</h1>
-<p class="sub">একটা একটা করে পূরণ করো — সব হলে বট নিজে নিজেই চালু হয়ে যাবে</p>
+<p class="sub">একটা একটা করে পূরণ করো — সব তোমার নিজের account-এ হবে, সব হলে বট নিজে নিজেই চালু হয়ে যাবে</p>
 
 <div class="card" id="card1">
   <span class="status" id="st1">⬜</span>
-  <h2>ধাপ ১: GitHub Token</h2>
-  <p>এটা লাগবে বটের সেটিং বসানোর জন্য। শুধু তোমার এই ফোনেই থাকবে — কোথাও পাঠানো হবে না। বসালেই নিজে নিজে যাচাই হয়ে যাবে।</p>
-  <a class="linkbtn" href="https://github.com/settings/personal-access-tokens/new" target="_blank">🔗 টোকেন নেই? এখানে গিয়ে বানাও</a>
+  <h2>ধাপ ১: GitHub-এ একটা খালি repo বানাও</h2>
+  <p>বটটা তোমার নিজের GitHub account-এর একটা repo-তে থাকবে। নিচের লিংকে গিয়ে খালি repo বানাও, তারপর repo-র নামটা এখানে লেখো।</p>
+  <a class="linkbtn" href="https://github.com/new" target="_blank">🔗 এখানে গিয়ে repo বানাও</a>
   <details>
-    <summary>টোকেন বানানোর সময় কী কী টিক দেবে?</summary>
+    <summary>repo বানানোর সময় কী করবে?</summary>
     <ol>
-      <li>Token name: যেকোনো নাম দাও (যেমন Bot Setup)</li>
-      <li>Expiration: 1 year বা No expiration</li>
-      <li>Repository access → <b>Only select repositories</b> → <b>blog-bot</b> বেছে নাও</li>
-      <li>Permissions → Repository permissions-এ টিক দাও: <b>Actions: Read and write</b>, <b>Secrets: Read and write</b>, <b>Workflows: Read and write</b></li>
-      <li>নিচে <b>Generate token</b> চাপো → token-টা কপি করে এখানে বসাও</li>
+      <li>Repository name: <b>blog-bot</b> লেখো</li>
+      <li><b>Private</b> বেছে নাও</li>
+      <li>আর কিছু টিক দিও না — একদম খালি রাখো</li>
+      <li><b>Create repository</b> চাপো</li>
     </ol>
   </details>
-  <input type="password" id="pat" placeholder="এখানে GitHub token-টা বসাও (github_pat_...)">
-  <button onclick="checkPat()">যাচাই করো</button>
+  <input type="text" id="repoName" placeholder="repo-র নাম লেখো (যেমন blog-bot)">
+  <button onclick="checkRepo()">ঠিক আছে</button>
   <div class="msg" id="msg1"></div>
 </div>
 
 <div class="card" id="card2">
   <span class="status" id="st2">⬜</span>
-  <h2>ধাপ ২: Gemini API Key</h2>
-  <p>বট এই key দিয়ে খবর rewrite করে। বসালেই নিজে নিজে যাচাই হয়ে যাবে।</p>
-  <a class="linkbtn" href="https://aistudio.google.com/apikey" target="_blank">🔗 Key নেই? এখানে গিয়ে বানাও (Create API key)</a>
-  <input type="password" id="gemini" placeholder="এখানে Gemini key-টা বসাও (AIza...)">
-  <button onclick="checkGemini()">যাচাই করো</button>
+  <h2>ধাপ ২: GitHub Token</h2>
+  <p>অ্যাপটা তোমার হয়ে repo-তে ফাইল আর সেটিং বসাবে — তার জন্য এই token লাগে। শুধু তোমার এই browser-এই থাকবে। বসালেই নিজে নিজে যাচাই হয়ে যাবে।</p>
+  <a class="linkbtn" href="https://github.com/settings/personal-access-tokens/new" target="_blank">🔗 টোকেন নেই? এখানে গিয়ে বানাও</a>
+  <details>
+    <summary>টোকেন বানানোর সময় কী কী টিক দেবে?</summary>
+    <ol>
+      <li>Token name: যেকোনো নাম (যেমন Bot Setup)</li>
+      <li>Expiration: 1 year বা No expiration</li>
+      <li>Repository access → <b>Only select repositories</b> → ধাপ ১-এর repo-টা বেছে নাও</li>
+      <li>Permissions → Repository permissions: <b>Actions: Read and write</b>, <b>Contents: Read and write</b>, <b>Secrets: Read and write</b>, <b>Workflows: Read and write</b></li>
+      <li><b>Generate token</b> → token-টা কপি করে এখানে বসাও</li>
+    </ol>
+  </details>
+  <input type="password" id="pat" placeholder="এখানে GitHub token-টা বসাও (github_pat_...)">
+  <button onclick="checkPat()">যাচাই করো</button>
   <div class="msg" id="msg2"></div>
 </div>
 
 <div class="card" id="card3">
   <span class="status" id="st3">⬜</span>
-  <h2>ধাপ ৩: Pixabay API Key <small style="color:#8b949e">(না দিলেও চলবে)</small></h2>
-  <p>ছবি খোঁজার backup হিসেবে লাগে। না থাকলে এই ধাপ এড়িয়ে যাও।</p>
-  <a class="linkbtn" href="https://pixabay.com/api/docs/" target="_blank">🔗 Key কোথায় পাবে? এই পেজে লগইন করলেই key লেখা দেখবে</a>
-  <input type="password" id="pixabay" placeholder="এখানে Pixabay key-টা বসাও">
-  <button onclick="checkPixabay()">যাচাই করো</button>
-  <button onclick="skipPixabay()">এড়িয়ে যাও</button>
+  <h2>ধাপ ৩: Gemini API Key</h2>
+  <p>বট এই key দিয়ে খবর rewrite করে। তোমার নিজের key বসাও — বসালেই নিজে নিজে যাচাই হয়ে যাবে।</p>
+  <a class="linkbtn" href="https://aistudio.google.com/apikey" target="_blank">🔗 Key নেই? এখানে গিয়ে বানাও (Create API key)</a>
+  <input type="password" id="gemini" placeholder="এখানে Gemini key-টা বসাও (AIza...)">
+  <button onclick="checkGemini()">যাচাই করো</button>
   <div class="msg" id="msg3"></div>
 </div>
 
 <div class="card" id="card4">
   <span class="status" id="st4">⬜</span>
-  <h2>ধাপ ৪: কোন ব্লগে পোস্ট হবে?</h2>
-  <p>নিচের বোতামে Google দিয়ে লগইন করলে তোমার ব্লগের তালিকা আসবে — সেখান থেকে একটা বেছে নিলেই হবে। যেই Google account-এ ব্লগটা আছে, সেটা দিয়েই লগইন করবে।</p>
-  <button class="google" onclick="pickBlog()">Google দিয়ে লগইন করে ব্লগ বাছো</button>
-  <div id="blogList" style="margin-top:10px"></div>
+  <h2>ধাপ ৪: Pixabay API Key <small style="color:#8b949e">(না দিলেও চলবে)</small></h2>
+  <p>ছবি খোঁজার backup হিসেবে লাগে। না থাকলে এই ধাপ এড়িয়ে যাও।</p>
+  <a class="linkbtn" href="https://pixabay.com/api/docs/" target="_blank">🔗 Key কোথায় পাবে? এই পেজে লগইন করলেই key লেখা দেখবে</a>
+  <input type="password" id="pixabay" placeholder="এখানে Pixabay key-টা বসাও">
+  <button onclick="checkPixabay()">যাচাই করো</button>
+  <button onclick="skipPixabay()">এড়িয়ে যাও</button>
   <div class="msg" id="msg4"></div>
 </div>
 
 <div class="card" id="card5">
   <span class="status" id="st5">⬜</span>
-  <h2>ধাপ ৫: Blogger-এ পোস্টের অনুমতি</h2>
-  <p>শেষ ধাপ। নিচের বোতামে চাপ দিলে Google-এর পেজ খুলবে — ধাপ ৪-এ যে account দিয়ে লগইন করেছিলে সেটাই বেছে নিয়ে <b>Allow / অনুমতি দাও</b> চাপবে। তাহলেই এখানে ফিরে আসবে, আর বট নিজে নিজেই চালু হয়ে যাবে।</p>
-  <button class="google" id="googleBtn" onclick="googleLogin()">Google-এ অনুমতি দাও</button>
+  <h2>ধাপ ৫: Google Cloud Client</h2>
+  <p>বট যাতে তোমার Blogger-এ পোস্ট করতে পারে, তার জন্য তোমার নিজের Google Cloud-এ একটা ছোট্ট client লাগে। একবারই করতে হয় — নিচের ধাপগুলো একে একে করো।</p>
+  <details open>
+    <summary>কীভাবে বানাবে — ধাপে ধাপে</summary>
+    <ol>
+      <li><a href="https://console.cloud.google.com/projectcreate" target="_blank">এখানে গিয়ে একটা Project বানাও</a> — নাম যেকোনো (যেমন My Blog Bot)</li>
+      <li><a href="https://console.cloud.google.com/apis/library/blogger.googleapis.com" target="_blank">এখানে গিয়ে Blogger API চালু করো</a> — উপরে তোমার project-টা বেছে নিয়ে <b>Enable</b> চাপো</li>
+      <li><a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank">Consent screen-এ যাও</a> — <b>External</b> বেছে নিয়ে নাম আর তোমার email দাও, শেষ পর্যন্ত গিয়ে <b>Publish app</b> চাপো</li>
+      <li><a href="https://console.cloud.google.com/apis/credentials" target="_blank">Credentials পেজে যাও</a> — <b>Create Credentials → OAuth client ID → Web application</b></li>
+      <li><b>Authorized JavaScript origins</b>-এ হুবহু এটা বসাও:</li>
+    </ol>
+  </details>
+  <input type="text" readonly id="originVal" value="https://testforany20-ship-it.github.io" onclick="this.select()">
+  <p style="margin-top:6px"><b>Authorized redirect URIs</b>-এ হুবহু এটা বসাও:</p>
+  <input type="text" readonly id="redirectVal" value="https://testforany20-ship-it.github.io/bot-setup-app/" onclick="this.select()">
+  <details>
+    <summary>তারপর?</summary>
+    <ol>
+      <li><b>Create</b> চাপলেই একটা <b>Client ID</b> আর <b>Client secret</b> দেখাবে</li>
+      <li>দুটোই কপি করে নিচে বসাও</li>
+    </ol>
+  </details>
+  <input type="text" id="clientId" placeholder="Client ID বসাও (...apps.googleusercontent.com)">
+  <input type="password" id="clientSecret" placeholder="Client secret বসাও">
+  <button onclick="checkClient()">ঠিক আছে</button>
   <div class="msg" id="msg5"></div>
+</div>
+
+<div class="card" id="card6">
+  <span class="status" id="st6">⬜</span>
+  <h2>ধাপ ৬: কোন ব্লগে পোস্ট হবে?</h2>
+  <p>নিচের বোতামে Google দিয়ে লগইন করলে তোমার ব্লগের তালিকা আসবে — একটা বেছে নিলেই হবে। যেই Google account-এ ব্লগটা আছে, সেটা দিয়েই লগইন করবে।</p>
+  <button class="google" onclick="pickBlog()">Google দিয়ে লগইন করে ব্লগ বাছো</button>
+  <div id="blogList" style="margin-top:10px"></div>
+  <div class="msg" id="msg6"></div>
+</div>
+
+<div class="card" id="card7">
+  <span class="status" id="st7">⬜</span>
+  <h2>ধাপ ৭: Blogger-এ পোস্টের অনুমতি</h2>
+  <p>শেষ ধাপ। নিচের বোতামে চাপ দিলে Google-এর পেজ খুলবে — ধাপ ৬-এ যে account দিয়ে লগইন করেছিলে সেটাই বেছে নিয়ে <b>Allow / অনুমতি দাও</b> চাপবে। তাহলেই এখানে ফিরে আসবে, আর বট নিজে নিজেই চালু হয়ে যাবে।</p>
+  <button class="google" onclick="googleLogin()">Google-এ অনুমতি দাও</button>
+  <div class="msg" id="msg7"></div>
 </div>
 
 <div class="card" id="cardLaunch">
@@ -106,35 +156,41 @@
   <div class="msg" id="msgLaunch"></div>
 </div>
 
-<p class="note">তোমার token আর key শুধু এই ফোনের browser-এ থাকে।<br>বটের secret GitHub-এর নিরাপদ ঘরে বসে — এখানে কিছু লেখা থাকে না।</p>
+<p class="note">সবকিছু তোমার নিজের account-এ হয় — তোমার GitHub, তোমার key, তোমার ব্লগ।<br>token আর key শুধু এই browser-এ থাকে; বটের secret তোমার repo-র নিরাপদ ঘরে বসে।</p>
 
 <script src="https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.14/dist/modules/libsodium-wrappers.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
-const CLIENT_ID = "362286799679-qgii5ier4jtdnecclcr198sc7puhmvs3.apps.googleusercontent.com";
-const REDIRECT_URI = "https://testforany20-ship-it.github.io/bot-setup-app/";
-const REPO = "testforany20-ship-it/blog-bot";
+const APP_URL = "https://testforany20-ship-it.github.io/bot-setup-app/";
 const SCOPE = "https://www.googleapis.com/auth/blogger";
 
 const $ = id => document.getElementById(id);
-const state = { pat:false, gemini:false, pixabay:false, blog:false, google:false };
-let chosenBlog = JSON.parse(localStorage.getItem("bs_blog") || "null");
-let authCode = sessionStorage.getItem("bs_code") || null;
+const state = { repo:false, pat:false, gemini:false, pixabay:false, client:false, blog:false, google:false };
+let owner = localStorage.getItem("ga_owner") || "";
+let chosenBlog = JSON.parse(localStorage.getItem("ga_blog") || "null");
+let authCode = sessionStorage.getItem("ga_code") || null;
 let launching = false, autoLaunched = false;
 
+const repoFull = () => owner + "/" + $("repoName").value.trim();
+const clientId = () => $("clientId").value.trim();
+
 function saveLocal() {
-  localStorage.setItem("bs_pat", $("pat").value.trim());
-  localStorage.setItem("bs_gemini", $("gemini").value.trim());
-  localStorage.setItem("bs_pixabay", $("pixabay").value.trim());
+  localStorage.setItem("ga_repo", $("repoName").value.trim());
+  localStorage.setItem("ga_pat", $("pat").value.trim());
+  localStorage.setItem("ga_gemini", $("gemini").value.trim());
+  localStorage.setItem("ga_pixabay", $("pixabay").value.trim());
+  localStorage.setItem("ga_cid", clientId());
+  localStorage.setItem("ga_csec", $("clientSecret").value.trim());
 }
+const NUM = { repo:"st1", pat:"st2", gemini:"st3", pixabay:"st4", client:"st5", blog:"st6", google:"st7" };
+const CARD = { repo:1, pat:2, gemini:3, pixabay:4, client:5, blog:6, google:7 };
 function mark(n, ok) {
   state[n] = ok;
-  const st = { pat:"st1", gemini:"st2", pixabay:"st3", blog:"st4", google:"st5" }[n];
-  $(st).textContent = ok ? "✅" : "⬜";
-  $("card" + {pat:1,gemini:2,pixabay:3,blog:4,google:5}[n]).classList.toggle("done", ok);
+  $(NUM[n]).textContent = ok ? "✅" : "⬜";
+  $("card" + CARD[n]).classList.toggle("done", ok);
   refreshLaunch();
 }
-function allReady() { return state.pat && state.gemini && state.blog && state.google && authCode; }
+function allReady() { return state.repo && state.pat && state.gemini && state.client && state.blog && state.google && authCode; }
 function refreshLaunch() {
   $("launchBtn").disabled = !allReady();
   if (allReady() && !autoLaunched && !launching) {
@@ -149,23 +205,34 @@ function ghHeaders() {
            "X-GitHub-Api-Version": "2022-11-28" };
 }
 
+function checkRepo() {
+  const v = $("repoName").value.trim(), m = $("msg1");
+  if (!v) { m.innerHTML = '<span class="err">আগে repo-র নামটা লেখো</span>'; return; }
+  saveLocal(); mark("repo", true);
+  m.innerHTML = '<span class="ok">✅ repo: ' + v + ' — এবার ধাপ ২-এ token দাও, তাহলেই যাচাই হবে এটা ঠিক আছে কিনা</span>';
+}
+
 async function checkPat() {
-  const v = $("pat").value.trim(), m = $("msg1");
+  const v = $("pat").value.trim(), m = $("msg2");
   if (!v) { m.innerHTML = '<span class="err">আগে token-টা বসাও</span>'; return; }
+  if (!$("repoName").value.trim()) { m.innerHTML = '<span class="err">আগে ধাপ ১-এ repo-র নামটা লেখো</span>'; return; }
   m.textContent = "যাচাই হচ্ছে…";
   try {
     let r = await fetch("https://api.github.com/user", { headers: ghHeaders() });
     if (!r.ok) throw new Error("bad");
-    let u = await r.json();
-    r = await fetch(`https://api.github.com/repos/${REPO}/actions/secrets/public-key`, { headers: ghHeaders() });
+    let u = await r.json(); owner = u.login;
+    localStorage.setItem("ga_owner", owner);
+    r = await fetch(`https://api.github.com/repos/${repoFull()}`, { headers: ghHeaders() });
+    if (!r.ok) { mark("pat", false); m.innerHTML = '<span class="err">❌ "' + repoFull() + '" repo-টা পাইনি। ধাপ ১-এ নামটা ঠিক লিখেছো তো? আর token বানানোর সময় এই repo-টাই বেছেছিলে তো?</span>'; return; }
+    r = await fetch(`https://api.github.com/repos/${repoFull()}/actions/secrets/public-key`, { headers: ghHeaders() });
     if (r.status === 403 || r.status === 404) {
       mark("pat", false);
-      m.innerHTML = '<span class="err">Token ঠিক আছে (' + u.login + '), কিন্তু এতে <b>Secrets</b> permission নেই।</span><br>উপরের নীল লিংক থেকে নতুন token বানাও — টিকের তালিকাটা খুলে দেখে নাও।';
+      m.innerHTML = '<span class="err">Token ঠিক আছে (' + owner + '), কিন্তু এতে <b>Secrets</b> permission নেই।</span><br>উপরের নীল লিংক থেকে নতুন token বানাও — টিকের তালিকাটা খুলে দেখে নাও।';
       return;
     }
-    if (!r.ok) throw new Error("repo");
-    saveLocal(); mark("pat", true);
-    m.innerHTML = '<span class="ok">✅ ঠিক আছে — account: ' + u.login + '</span>';
+    if (!r.ok) throw new Error("perm");
+    saveLocal(); mark("repo", true); mark("pat", true);
+    m.innerHTML = '<span class="ok">✅ ঠিক আছে — account: ' + owner + ', repo: ' + repoFull() + '</span>';
   } catch(e) {
     mark("pat", false);
     m.innerHTML = '<span class="err">❌ Token কাজ করছে না। ঠিক করে বসিয়েছো তো?</span>';
@@ -173,7 +240,7 @@ async function checkPat() {
 }
 
 async function checkGemini() {
-  const v = $("gemini").value.trim(), m = $("msg2");
+  const v = $("gemini").value.trim(), m = $("msg3");
   if (!v) { m.innerHTML = '<span class="err">আগে key-টা বসাও</span>'; return; }
   m.textContent = "যাচাই হচ্ছে…";
   try {
@@ -188,7 +255,7 @@ async function checkGemini() {
 }
 
 async function checkPixabay() {
-  const v = $("pixabay").value.trim(), m = $("msg3");
+  const v = $("pixabay").value.trim(), m = $("msg4");
   if (!v) { m.innerHTML = '<span class="warn">Key বসাও, অথবা "এড়িয়ে যাও" চাপো</span>'; return; }
   m.textContent = "যাচাই হচ্ছে…";
   try {
@@ -203,10 +270,17 @@ async function checkPixabay() {
 }
 function skipPixabay() {
   $("pixabay").value = ""; saveLocal(); mark("pixabay", true);
-  $("msg3").innerHTML = '<span class="warn">⏭️ এড়িয়ে গেলে — শুধু Wikimedia ছবি দিয়েই বট চলবে</span>';
+  $("msg4").innerHTML = '<span class="warn">⏭️ এড়িয়ে গেলে — শুধু Wikimedia ছবি দিয়েই বট চলবে</span>';
 }
 
-// Auto-verify when a value is pasted/typed (no need to press the button)
+function checkClient() {
+  const id = clientId(), sec = $("clientSecret").value.trim(), m = $("msg5");
+  if (!id.includes(".apps.googleusercontent.com")) { mark("client", false); m.innerHTML = '<span class="err">❌ Client ID-টা ঠিক মনে হচ্ছে না — শেষে .apps.googleusercontent.com থাকার কথা</span>'; return; }
+  if (sec.length < 10) { mark("client", false); m.innerHTML = '<span class="err">❌ Client secret-টা বসাও</span>'; return; }
+  saveLocal(); mark("client", true);
+  m.innerHTML = '<span class="ok">✅ Client বসানো হয়েছে — ধাপ ৬-এ গিয়ে যাচাই হবে এটা কাজ করে কিনা</span>';
+}
+
 function autoVerify(inputId, fn, minLen) {
   let t = null, last = "";
   $(inputId).addEventListener("input", () => {
@@ -221,12 +295,13 @@ autoVerify("gemini", checkGemini, 15);
 autoVerify("pixabay", checkPixabay, 10);
 
 function pickBlog() {
-  const m = $("msg4");
+  const m = $("msg6");
+  if (!state.client) { m.innerHTML = '<span class="err">আগে ধাপ ৫-এ Client ID বসাও</span>'; return; }
   if (!window.google || !google.accounts) { m.innerHTML = '<span class="err">Google-এর জিনিসটা এখনো লোড হয়নি — একটু অপেক্ষা করে আবার চাপো</span>'; return; }
   const client = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID, scope: SCOPE,
+    client_id: clientId(), scope: SCOPE,
     callback: async (resp) => {
-      if (resp.error) { m.innerHTML = '<span class="err">❌ লগইন হয়নি: ' + resp.error + '</span>'; return; }
+      if (resp.error) { m.innerHTML = '<span class="err">❌ লগইন হয়নি: ' + resp.error + ' — ধাপ ৫-এর Client ID ঠিক আছে তো? আর ওই client-এ এই পেজের ঠিকানা (origin) বসিয়েছিলে তো?</span>'; return; }
       m.textContent = "ব্লগের তালিকা আসছে…";
       try {
         let r = await fetch("https://www.googleapis.com/blogger/v3/users/self/blogs",
@@ -240,7 +315,7 @@ function pickBlog() {
           d.innerHTML = "📝 " + b.name + "<small>" + b.url + "</small>";
           d.onclick = () => {
             chosenBlog = { id: b.id, name: b.name };
-            localStorage.setItem("bs_blog", JSON.stringify(chosenBlog));
+            localStorage.setItem("ga_blog", JSON.stringify(chosenBlog));
             document.querySelectorAll(".blog-item").forEach(x => x.classList.remove("sel"));
             d.classList.add("sel"); mark("blog", true);
             m.innerHTML = '<span class="ok">✅ বেছে নিয়েছো: ' + b.name + '</span>';
@@ -250,7 +325,7 @@ function pickBlog() {
         if (!data.items || !data.items.length)
           m.innerHTML = '<span class="err">এই account-এ কোনো ব্লগ পাইনি — ঠিক account দিয়ে লগইন করেছো তো?</span>';
       } catch(e) {
-        m.innerHTML = '<span class="err">❌ ব্লগের তালিকা আনতে পারিনি</span>';
+        m.innerHTML = '<span class="err">❌ ব্লগের তালিকা আনতে পারিনি — Blogger API চালু করেছিলে তো (ধাপ ৫)?</span>';
       }
     }
   });
@@ -258,68 +333,96 @@ function pickBlog() {
 }
 
 function googleLogin() {
-  const url = "https://accounts.google.com/o/oauth2/v2/auth?client_id=" + CLIENT_ID +
-    "&redirect_uri=" + encodeURIComponent(REDIRECT_URI) +
+  if (!state.client) { $("msg7").innerHTML = '<span class="err">আগে ধাপ ৫-এ Client ID বসাও</span>'; return; }
+  const url = "https://accounts.google.com/o/oauth2/v2/auth?client_id=" + clientId() +
+    "&redirect_uri=" + encodeURIComponent(APP_URL) +
     "&response_type=code&scope=" + encodeURIComponent(SCOPE) +
     "&access_type=offline&prompt=consent&include_granted_scopes=true";
   location.href = url;
 }
 
-// Returning from Google consent? Restore saved values and re-verify them automatically.
 (function init() {
   const q = new URLSearchParams(location.search);
   if (q.get("code")) {
     authCode = q.get("code");
-    sessionStorage.setItem("bs_code", authCode);
-    history.replaceState({}, "", REDIRECT_URI);
+    sessionStorage.setItem("ga_code", authCode);
+    history.replaceState({}, "", APP_URL);
   }
   if (q.get("error")) {
-    $("msg5").innerHTML = '<span class="err">❌ Google অনুমতি দেয়নি: ' + q.get("error") + ' — আবার চেষ্টা করো</span>';
-    history.replaceState({}, "", REDIRECT_URI);
+    $("msg7").innerHTML = '<span class="err">❌ Google অনুমতি দেয়নি: ' + q.get("error") + ' — আবার চেষ্টা করো</span>';
+    history.replaceState({}, "", APP_URL);
   }
-  $("pat").value = localStorage.getItem("bs_pat") || "";
-  $("gemini").value = localStorage.getItem("bs_gemini") || "";
-  $("pixabay").value = localStorage.getItem("bs_pixabay") || "";
+  $("repoName").value = localStorage.getItem("ga_repo") || "";
+  $("pat").value = localStorage.getItem("ga_pat") || "";
+  $("gemini").value = localStorage.getItem("ga_gemini") || "";
+  $("pixabay").value = localStorage.getItem("ga_pixabay") || "";
+  $("clientId").value = localStorage.getItem("ga_cid") || "";
+  $("clientSecret").value = localStorage.getItem("ga_csec") || "";
   if (authCode) {
     mark("google", true);
-    $("msg5").innerHTML = '<span class="ok">✅ Google অনুমতি পাওয়া গেছে! বাকি ধাপগুলো যাচাই হলেই বট নিজে নিজে চালু হয়ে যাবে — দেরি করো না, এই কোড বেশিক্ষণ থাকে না।</span>';
+    $("msg7").innerHTML = '<span class="ok">✅ Google অনুমতি পাওয়া গেছে! বাকি ধাপগুলো যাচাই হলেই বট নিজে নিজে চালু হয়ে যাবে — দেরি করো না, এই কোড বেশিক্ষণ থাকে না।</span>';
   }
+  if ($("repoName").value) mark("repo", true);
   if (chosenBlog) {
     mark("blog", true);
-    $("msg4").innerHTML = '<span class="ok">✅ আগের বাছাই: ' + chosenBlog.name + ' (বদলাতে চাইলে আবার লগইন করো)</span>';
+    $("msg6").innerHTML = '<span class="ok">✅ আগের বাছাই: ' + chosenBlog.name + ' (বদলাতে চাইলে আবার লগইন করো)</span>';
   }
-  if ($("pat").value) checkPat();
+  if ($("clientId").value && $("clientSecret").value) checkClient();
+  if ($("pat").value && $("repoName").value) checkPat();
   if ($("gemini").value) checkGemini();
   if ($("pixabay").value) checkPixabay();
 })();
 
+function b64utf8(text) {
+  const bytes = new TextEncoder().encode(text);
+  let bin = "";
+  bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+
+async function putFile(path, content, label, step) {
+  const url = `https://api.github.com/repos/${repoFull()}/contents/${path}`;
+  let sha = null;
+  let g = await fetch(url, { headers: ghHeaders() });
+  if (g.ok) sha = (await g.json()).sha;
+  const body = { message: "Blog Bot Setup: " + label, content: b64utf8(content) };
+  if (sha) body.sha = sha;
+  let r = await fetch(url, { method: "PUT", headers: { ...ghHeaders(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!r.ok) throw new Error("ফাইল বসাতে পারিনি: " + label);
+  step("✅ " + label + " বসে গেছে");
+}
+
 async function setSecret(name, value) {
   await sodium.ready;
-  let r = await fetch(`https://api.github.com/repos/${REPO}/actions/secrets/public-key`, { headers: ghHeaders() });
+  let r = await fetch(`https://api.github.com/repos/${repoFull()}/actions/secrets/public-key`, { headers: ghHeaders() });
   if (!r.ok) throw new Error("key");
   const { key, key_id } = await r.json();
   const pk = sodium.from_base64(key, sodium.base64_variants.ORIGINAL);
   const enc = sodium.crypto_box_seal(sodium.from_string(value), pk);
-  r = await fetch(`https://api.github.com/repos/${REPO}/actions/secrets/${name}`, {
+  r = await fetch(`https://api.github.com/repos/${repoFull()}/actions/secrets/${name}`, {
     method: "PUT", headers: { ...ghHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({ encrypted_value: sodium.to_base64(enc, sodium.base64_variants.ORIGINAL), key_id })
   });
   if (!r.ok) throw new Error("secret " + name);
 }
 
-async function dispatch(workflow) {
-  let r = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/${workflow}/dispatches`, {
-    method: "POST", headers: { ...ghHeaders(), "Content-Type": "application/json" },
-    body: JSON.stringify({ ref: "main" })
-  });
-  if (!r.ok) throw new Error("dispatch " + workflow);
+async function dispatch(workflow, tries) {
+  for (let i = 0; i < (tries || 1); i++) {
+    let r = await fetch(`https://api.github.com/repos/${repoFull()}/actions/workflows/${workflow}/dispatches`, {
+      method: "POST", headers: { ...ghHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ref: "main" })
+    });
+    if (r.ok) return;
+    if (i < (tries || 1) - 1) await new Promise(x => setTimeout(x, 10000));
+  }
+  throw new Error("dispatch " + workflow);
 }
 
 async function waitRun(workflow, label, timeoutMs) {
   const t0 = Date.now();
   await new Promise(r => setTimeout(r, 8000));
   while (Date.now() - t0 < timeoutMs) {
-    let r = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/${workflow}/runs?per_page=1`, { headers: ghHeaders() });
+    let r = await fetch(`https://api.github.com/repos/${repoFull()}/actions/workflows/${workflow}/runs?per_page=1`, { headers: ghHeaders() });
     if (r.ok) {
       let runs = (await r.json()).workflow_runs || [];
       if (runs.length) {
@@ -342,29 +445,42 @@ async function launch() {
   btn.disabled = true; box.style.display = "block"; box.innerHTML = ""; m.innerHTML = "";
   const step = (t) => { box.innerHTML += "<div>" + t + "</div>"; };
   try {
-    step("⏳ সেটিং বসানো হচ্ছে…");
+    step("⏳ বটের ফাইলগুলো তোমার repo-তে বসানো হচ্ছে…");
+    const files = [
+      ["bot.py", "bot.py", "বটের মূল ফাইল"],
+      ["bot.yml", ".github/workflows/bot.yml", "বটের সময়সূচি"],
+      ["setup_exchange.py", "setup_exchange.py", "Google সংযোগের ফাইল"],
+      ["setup-exchange.yml", ".github/workflows/setup-exchange.yml", "সংযোগের সময়সূচি"]
+    ];
+    for (const [src, dest, label] of files) {
+      let fr = await fetch(src);
+      if (!fr.ok) throw new Error("template " + src);
+      await putFile(dest, await fr.text(), label, step);
+    }
+    await putFile("posted.json", "[]", "পোস্টের তালিকা", step);
+    step("⏳ সব সেটিং বসানো হচ্ছে…");
     await setSecret("GEMINI_API_KEY", $("gemini").value.trim());
     if ($("pixabay").value.trim()) await setSecret("PIXABAY_API_KEY", $("pixabay").value.trim());
     await setSecret("BLOG_ID", chosenBlog.id);
-    step("✅ API key আর ব্লগ বসে গেছে");
+    await setSecret("CLIENT_ID", clientId());
+    await setSecret("CLIENT_SECRET", $("clientSecret").value.trim());
+    await setSecret("NEW_CLIENT_ID", clientId());
+    await setSecret("NEW_CLIENT_SECRET", $("clientSecret").value.trim());
     await setSecret("SETUP_CODE", authCode);
     await setSecret("SETUP_PAT", $("pat").value.trim());
+    step("✅ সব সেটিং বসে গেছে");
     step("⏳ Google সংযোগ তৈরি হচ্ছে (১–২ মিনিট লাগতে পারে)…");
-    await dispatch("setup-exchange.yml");
+    await dispatch("setup-exchange.yml", 3);
     await waitRun("setup-exchange.yml", "Google সংযোগ", 240000);
     step("✅ Google সংযোগ হয়ে গেছে");
-    sessionStorage.removeItem("bs_code"); authCode = null;
+    sessionStorage.removeItem("ga_code"); authCode = null;
     step("⏳ বটের প্রথম রান শুরু হচ্ছে…");
-    let r = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows?per_page=50`, { headers: ghHeaders() });
-    let wfs = (await r.json()).workflows.filter(w => w.state === "active" && !w.path.includes("setup-exchange"));
-    if (!wfs.length) throw new Error("workflow not found");
-    let main = wfs.find(w => /post|bot|news/i.test(w.name + w.path)) || wfs[0];
-    await dispatch(main.path.split("/").pop());
-    step("🎉 <b>বট চালু হয়ে গেছে!</b> প্রথম পোস্টের রান শুরু হয়েছে। এরপর থেকে বট নিজে নিজেই সময়মতো পোস্ট করবে।");
-    step('রান দেখতে চাইলে: <a href="https://github.com/' + REPO + '/actions" target="_blank">GitHub Actions পেজ</a>');
+    await dispatch("bot.yml", 3);
+    step("🎉 <b>বট চালু হয়ে গেছে!</b> প্রথম পোস্টের রান শুরু হয়েছে। এরপর থেকে বট নিজে নিজেই প্রতি ঘণ্টায় পোস্ট করবে।");
+    step('রান দেখতে চাইলে: <a href="https://github.com/' + repoFull() + '/actions" target="_blank">তোমার GitHub Actions পেজ</a>');
     $("cardLaunch").classList.add("done");
   } catch(e) {
-    m.innerHTML = '<span class="err">❌ মাঝখানে আটকে গেছে: ' + e.message + '<br>নিচের বোতামটা চাপলে আবার চেষ্টা হবে। Google কোডের মেয়াদ শেষ হয়ে গেলে ধাপ ৫ আবার করতে হবে।</span>';
+    m.innerHTML = '<span class="err">❌ মাঝখানে আটকে গেছে: ' + e.message + '<br>নিচের বোতামটা চাপলে আবার চেষ্টা হবে। Google কোডের মেয়াদ শেষ হয়ে গেলে ধাপ ৭ আবার করতে হবে।</span>';
     launching = false; autoLaunched = false;
     btn.disabled = false;
   }
