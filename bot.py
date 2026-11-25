@@ -34,6 +34,27 @@ MODELS = ["gemini-3.5-flash", "gemini-3.8-flash", "gemini-flash-lite-latest"]
 MAX_POSTS = int(os.getenv("MAX_POSTS", "1"))
 DRAFT = os.getenv("DRAFT", "true").lower() == "true"
 
+# Optional in-app settings (edited from the Blog Bot Setup app, saved as
+# settings.json in the repo). Anything set there overrides the defaults above.
+try:
+    with open("settings.json", encoding="utf-8") as _f:
+        _settings = json.load(_f)
+    if isinstance(_settings.get("feeds"), list) and _settings["feeds"]:
+        FEEDS = [str(u) for u in _settings["feeds"]]
+    if _settings.get("keywords"):
+        KEYWORDS = re.compile(
+            r"\b(" + "|".join(re.escape(str(k)) for k in _settings["keywords"]) + r")\b",
+            re.I,
+        )
+    if _settings.get("max_posts"):
+        MAX_POSTS = int(_settings["max_posts"])
+    if "draft" in _settings:
+        DRAFT = bool(_settings["draft"])
+except FileNotFoundError:
+    pass
+except Exception as _e:
+    print("settings.json ignored:", _e)
+
 UA = {
     "User-Agent": "Mozilla/5.0 (compatible; MohinTechNewsBot/1.0)"
 }

@@ -30,6 +30,10 @@
   .blog-item { display: block; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; font-size: 15px; }
   .blog-item.sel { border-color: #238636; background: #12241a; }
   .blog-item small { color: #8b949e; display: block; word-break: break-all; }
+  select { width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3; font-size: 15px; margin-bottom: 10px; font-family: inherit; }
+  .chk { display: block; font-size: 15px; padding: 7px 0; cursor: pointer; }
+  .chk input { margin-right: 8px; transform: scale(1.2); }
+  label.lbl { display: block; font-size: 14px; color: #b6c0ca; margin: 10px 0 6px; }
   #launchBtn { font-size: 18px; padding: 15px; }
   #progress { display: none; }
   #progress div { font-size: 15px; padding: 4px 0; }
@@ -154,6 +158,39 @@
   <button class="primary" id="launchBtn" disabled onclick="launch()">বট চালু করো</button>
   <div id="progress"></div>
   <div class="msg" id="msgLaunch"></div>
+</div>
+
+<div class="card" id="cardSettings">
+  <h2>⚙️ বটের সেটিং — ক্লিক করে এডিট করো</h2>
+  <p>বট চালু হওয়ার পর যেকোনো সময় এখান থেকে বটের আচরণ বদলাতে পারবে — কোড ছোঁয়ার দরকার নেই। বদলে <b>সেটিং সেভ করো</b> চাপলেই পরের রান থেকে নতুন সেটিং চলবে। (আগে ধাপ ১–২ পূরণ থাকতে হবে, কারণ সেটিং তোমার repo-তেই সেভ হয়।)</p>
+  <label class="lbl">এক রানে কয়টা পোস্ট?</label>
+  <select id="setMaxPosts">
+    <option value="1">১টা</option>
+    <option value="2" selected>২টা</option>
+    <option value="3">৩টা</option>
+    <option value="4">৪টা</option>
+    <option value="5">৫টা</option>
+  </select>
+  <label class="lbl">পোস্ট কীভাবে যাবে?</label>
+  <select id="setDraft">
+    <option value="false" selected>সরাসরি পাবলিশ</option>
+    <option value="true">আগে ড্রাফট — পরে নিজে পাবলিশ করবে</option>
+  </select>
+  <label class="lbl">কোন কোন জায়গা থেকে খবর নেবে?</label>
+  <div id="setFeeds">
+    <label class="chk"><input type="checkbox" value="https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml" checked> BBC — আমেরিকা</label>
+    <label class="chk"><input type="checkbox" value="https://feeds.bbci.co.uk/news/world/rss.xml" checked> BBC — বিশ্ব</label>
+    <label class="chk"><input type="checkbox" value="https://www.aljazeera.com/xml/rss/all.xml" checked> Al Jazeera</label>
+    <label class="chk"><input type="checkbox" value="https://www.theguardian.com/world/rss" checked> The Guardian — বিশ্ব</label>
+    <label class="chk"><input type="checkbox" value="https://feeds.npr.org/1001/rss.xml" checked> NPR</label>
+  </div>
+  <label class="lbl">নিজের আরেকটা নিউজ সোর্স (RSS লিংক) — না থাকলে খালি রাখো</label>
+  <input type="text" id="setCustomFeed" placeholder="https://...">
+  <label class="lbl">কোন বিষয়ের খবর নেবে? (কমা দিয়ে আলাদা করে লেখো)</label>
+  <input type="text" id="setKeywords" value="trump, white house, pentagon, congress, senate, u.s., united states, american, washington, war, ukraine, russia, gaza, israel, iran, hamas, nato, missile, airstrike, ceasefire, troops, military, china, taiwan">
+  <button onclick="loadSettings()">আগের সেটিং দেখো</button>
+  <button class="primary" onclick="saveSettings()">সেটিং সেভ করো</button>
+  <div class="msg" id="msgSettings"></div>
 </div>
 
 <p class="note">সবকিছু তোমার নিজের account-এ হয় — তোমার GitHub, তোমার key, তোমার ব্লগ।<br>token আর key শুধু এই browser-এ থাকে; বটের secret তোমার repo-র নিরাপদ ঘরে বসে।</p>
@@ -372,6 +409,63 @@ function googleLogin() {
   if ($("gemini").value) checkGemini();
   if ($("pixabay").value) checkPixabay();
 })();
+
+async function loadSettings() {
+  const m = $("msgSettings");
+  if (!$("pat").value.trim() || !$("repoName").value.trim() || !owner) {
+    m.innerHTML = '<span class="err">আগে ধাপ ১–২ পূরণ করো (repo + token যাচাই)</span>'; return;
+  }
+  m.textContent = "সেটিং আসছে…";
+  try {
+    let r = await fetch(`https://api.github.com/repos/${repoFull()}/contents/settings.json`, { headers: ghHeaders() });
+    if (r.status === 404) { m.innerHTML = '<span class="warn">এখনো কোনো সেটিং সেভ হয়নি — নিচেরটাই ডিফল্ট চলছে</span>'; return; }
+    if (!r.ok) throw new Error("x");
+    let data = await r.json();
+    let s = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g, "")))));
+    if (s.max_posts) $("setMaxPosts").value = String(s.max_posts);
+    if ("draft" in s) $("setDraft").value = s.draft ? "true" : "false";
+    if (Array.isArray(s.feeds)) {
+      const known = new Set();
+      document.querySelectorAll("#setFeeds input[type=checkbox]").forEach(c => {
+        c.checked = s.feeds.includes(c.value);
+        known.add(c.value);
+      });
+      const extra = s.feeds.filter(u => !known.has(u));
+      if (extra.length) $("setCustomFeed").value = extra[0];
+    }
+    if (Array.isArray(s.keywords) && s.keywords.length) $("setKeywords").value = s.keywords.join(", ");
+    m.innerHTML = '<span class="ok">✅ আগের সেটিং লোড হয়েছে</span>';
+  } catch(e) {
+    m.innerHTML = '<span class="err">❌ সেটিং আনতে পারিনি</span>';
+  }
+}
+
+async function saveSettings() {
+  const m = $("msgSettings");
+  if (!$("pat").value.trim() || !$("repoName").value.trim() || !owner) {
+    m.innerHTML = '<span class="err">আগে ধাপ ১–২ পূরণ করো (repo + token যাচাই)</span>'; return;
+  }
+  const feeds = [];
+  document.querySelectorAll("#setFeeds input[type=checkbox]:checked").forEach(c => feeds.push(c.value));
+  const custom = $("setCustomFeed").value.trim();
+  if (custom) feeds.push(custom);
+  if (!feeds.length) { m.innerHTML = '<span class="err">অন্তত একটা নিউজ সোর্স টিক দাও</span>'; return; }
+  const keywords = $("setKeywords").value.split(",").map(x => x.trim().toLowerCase()).filter(Boolean);
+  if (!keywords.length) { m.innerHTML = '<span class="err">অন্তত একটা বিষয় লেখো</span>'; return; }
+  const settings = {
+    max_posts: parseInt($("setMaxPosts").value, 10),
+    draft: $("setDraft").value === "true",
+    feeds: feeds,
+    keywords: keywords
+  };
+  m.textContent = "সেভ হচ্ছে…";
+  try {
+    await putFile("settings.json", JSON.stringify(settings, null, 2), "বটের সেটিং", () => {});
+    m.innerHTML = '<span class="ok">✅ সেটিং সেভ হয়ে গেছে — বটের পরের রান থেকেই এই সেটিং চলবে</span>';
+  } catch(e) {
+    m.innerHTML = '<span class="err">❌ সেভ হয়নি: ' + e.message + '</span>';
+  }
+}
 
 function b64utf8(text) {
   const bytes = new TextEncoder().encode(text);
