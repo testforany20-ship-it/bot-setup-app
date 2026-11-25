@@ -122,9 +122,10 @@
       <li><b>Authorized JavaScript origins</b>-এ হুবহু এটা বসাও:</li>
     </ol>
   </details>
-  <input type="text" readonly id="originVal" value="https://testforany20-ship-it.github.io" onclick="this.select()">
+  <input type="text" id="originVal" value="" onclick="this.select()">
   <p style="margin-top:6px"><b>Authorized redirect URIs</b>-এ হুবহু এটা বসাও:</p>
-  <input type="text" readonly id="redirectVal" value="https://testforany20-ship-it.github.io/bot-setup-app/" onclick="this.select()">
+  <input type="text" id="redirectVal" value="" onclick="this.select()">
+  <p>এই দুটো ঠিকানা অ্যাপটা যেখানে চলছে সেখানকার ঠিকানা — নিজে নিজেই বসে যায়, চাইলে বদলাতেও পারবে।</p>
   <details>
     <summary>তারপর?</summary>
     <ol>
@@ -200,7 +201,7 @@
 <script src="https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.14/dist/modules/libsodium-wrappers.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
-const APP_URL = "https://testforany20-ship-it.github.io/bot-setup-app/";
+const APP_URL = location.origin + location.pathname.replace(/\/?$/, "/");
 const SCOPE = "https://www.googleapis.com/auth/blogger";
 
 const $ = id => document.getElementById(id);
@@ -381,6 +382,8 @@ function googleLogin() {
 }
 
 (function init() {
+  $("originVal").value = location.origin;
+  $("redirectVal").value = APP_URL;
   const q = new URLSearchParams(location.search);
   if (q.get("code")) {
     authCode = q.get("code");
